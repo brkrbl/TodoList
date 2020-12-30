@@ -1,0 +1,129 @@
+﻿@{
+    Layout = "~/Views/Shared/_TodoLayout.cshtml";
+}
+
+<div class="card-body">
+    <style>
+        input {
+            border-radius: 10px;
+            text-align: center;
+        }
+        .list-group-item {
+            border: 0;
+        }
+
+        textarea {
+            width: 750px;
+            height: 200px;
+            border-radius: 12px;
+            border: solid;
+        }
+
+        #content {
+            display: none !important;
+
+        }
+
+        #user {
+            display: none !important;
+        }
+    </style>
+
+
+
+    <h5 class="card-title" id="tasks-title">Todos</h5>
+    <hr>
+
+    <div id="liste">
+
+    </div>
+
+    <a id="clear-todos" class="btn btn-danger" asp-action="add" asp-controller="todo" style="width: 200px;">Add Todo</a>
+</div>
+
+
+
+@section Scripts{
+    <script>
+        var token = localStorage.getItem('key');
+        var userId = parseInt(localStorage.getItem('id'));
+        $(document).ready(function () { 
+            $.ajax({
+                type: 'GET',
+                url: '/api/todo/' + userId,
+                data: JSON.stringify({ "id": userId }),
+                headers: { Authorization: 'Bearer ' + token },
+                success: function (data) {
+                    $.each(data, function (index, value) {
+                        var text = document.createElement('ul');
+                        text.className = "list-group";
+                        text.innerHTML = "<li class='list-group-item d-flex justify-content-between' id='header' style='font-size:25px;font-weight: 500;'><input readonly id='header" + value.todoId + "' value='" + value.header + "' style='border:aliceblue'/><ul class='list-group'><li class='list-group-item d-flex justify-content-between'><button id='" + value.todoId + "'type='button' class='btn btn-success' id='show' onclick='func(" + value.todoId + ")'><span id='showHide'>Show</span> </button><button class='btn btn-danger' id='delete' onclick='delfunc(" + value.todoId + ")'><i class='fa fa-remove'></i></button</a></li></ul></li><li class='list-group-item d-flex justify-content-between' id='content'><textarea id='text" + value.todoId + "'readonly>" + value.content + "</textarea></li><li class='list-group-item d-flex justify-content-between' id='user'><p id='user" + value.user.username + "' > <p> Time: " + value.date + "</p></li>";
+                        var hr = document.createElement("hr");
+                        $('#liste').append(text);
+                        $('#liste').append(hr);
+                    });
+                },
+                error: function () {
+
+                }
+            });
+        });
+        function delfunc(value) {
+            $.ajax({
+                type: 'DELETE',
+                url: '/api/todo/' + value,
+                data: { "id": value },
+                headers: { Authorization: 'Bearer ' + token },
+                success: function () {
+                    location.reload();
+                }
+            });
+        }
+        function func(element) {
+            if ($("#" + element).text() === "Show") {
+                var button = document.createElement("button");
+                button.id = "updateTodo" + element;
+                button.className = "btn btn-primary";
+                button.textContent = "Update";
+                document.getElementById('header'+element).style.border = "solid";
+                $("#" + element).parent()[0].insertBefore(button, $("#" + element)[0]);
+                $("#" + element).text("Close");
+                $("#" + element).parent().parent().parent().next().attr("style", "display: block !important");
+                $("#" + element).parent().parent().parent().next().next().attr("style", "display: block !important");
+                document.getElementById("text" + element).readOnly = false;
+                document.getElementById("header" + element).readOnly = false;
+                $("#updateTodo"+element).click(function () {
+                    var id = parseInt($("#" + element)[0].id);
+                    var header = document.getElementById("header" + element).value;
+                    var content = document.getElementById("text" + element).value;
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/api/todo/',
+                        data: JSON.stringify({ "todoId": id, "header": header, "content": content, "userId": userId}),
+                        dataType: 'JSON',
+                        contentType: "application/json",
+                        headers: { Authorization: 'Bearer ' + token },
+                        success: function () {
+                            location.reload();
+                        }
+                    });
+                });
+            }
+            else {
+                document.getElementById('header'+element).style.border = "aliceblue";
+                $("#" + element).text("Show");
+                $("#" + element).parent().parent().parent().next().attr("style", "display: none !important");
+                $("#" + element).parent().parent().parent().next().next().attr("style", "display: none !important");
+                document.getElementById("text" + element).readOnly = true;
+                document.getElementById("header" + element).readOnly = true;
+                var elem = document.getElementById("updateTodo" + element);
+
+                if (elem != null) {
+                    elem.remove();
+                }
+
+
+            }
+        }
+    </script>
+}

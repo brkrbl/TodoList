@@ -1,0 +1,78 @@
+﻿@model Entities.Dto.LoginDto
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<style>
+    #message {
+        text-align: center;
+        display: none;
+    }
+</style>
+
+    <div class="alert alert-danger" id="message" role="alert">
+        The username or password is incorrect !
+    </div>
+
+<div id="login">
+    <h3 class="text-center text-white pt-5">Login form</h3>
+    <div class="container">
+        <div id="login-row" class="row justify-content-center align-items-center">
+            <div id="login-column" class="col-md-6">
+                <div id="login-box" class="col-md-12">
+                    <form asp-controller="Home" asp-action="Index" id="myForm">
+                        <h3 class="text-center text-info">Login</h3>
+                        <div class="form-group">
+                            <label for="username" class="text-info">Username:</label><br>
+                            <input type="text" id="inputUserame" class="form-control" placeholder="Username" required autofocus asp-for="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="text-info">Password:</label><br>
+                            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required asp-for="password">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-info btn-md" type="submit" id="signIn">Sign In</button>
+                        </div>
+                        <div id="register-link" class="text-right">
+                            <a class="d-block text-center mt-2 small" asp-controller="Home" asp-action="Register">Register</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    <script>
+        $("#signIn").click(function (event) {
+            event.preventDefault();
+            var username1 = $("#inputUserame").val();
+            var password1 = $("#inputPassword").val();
+            $.ajax({
+                url: '/api/user/Authenticate/',
+                type: 'POST',
+                data: JSON.stringify({ "username": username1, "password": password1 }),
+                dataType: 'JSON',
+                contentType: "application/json",
+                success: function (data) {
+                    if (data != null) {
+                        localStorage.setItem("key", data.token);
+                        localStorage.setItem("id", data.userId);
+                        window.location.href = '@Url.Action("Todos","Todo")';
+                    }
+                    else {
+                        $('#message').attr("style", "display: block");
+                    }
+
+                },
+                
+            });
+            
+        })
+
+
+    </script>
+}

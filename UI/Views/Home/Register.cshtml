@@ -1,0 +1,86 @@
+﻿@model Entities.Dto.RegisterDto
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+<style>
+    #message {
+        text-align: center;
+        display: none;
+    }
+</style>
+
+
+    <div class="alert alert-danger" id="message" role="alert">
+        There is such a username !
+    </div>
+<div id="login">
+    <h3 class="text-center text-white pt-5">Register form</h3>
+    <div class="container">
+        <div id="login-row" class="row justify-content-center align-items-center">
+            <div id="login-column" class="col-md-6">
+                <div id="login-box" class="col-md-12">
+                    <form asp-controller="Home" asp-action="Register" id="myForm">
+                        <h3 class="text-center text-info">Register</h3>
+                        <div class="form-group">
+                            <label for="Firstname" class="text-info">Firstname:</label><br>
+                            <input type="text" id="firstName" class="form-control" placeholder="Firstname" required autofocus asp-for="Firstname">
+                        </div>
+                        <div class="form-group">
+                            <label for="Lastname" class="text-info">Lastname:</label><br>
+                            <input type="text" id="LastName" class="form-control" placeholder="Lastname" required autofocus asp-for="Lastname">
+                        </div>
+                        <div class="form-group">
+                            <label for="username" class="text-info">Username:</label><br>
+                            <input type="text" id="inputUserame" class="form-control" placeholder="Username" required autofocus asp-for="Username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="text-info">Password:</label><br>
+                            <input type="password" id="inputPassword" class="form-control" placeholder="Password" required asp-for="Pwd">
+                        </div>
+                        <div class="form-group">
+                            <label for="Email" class="text-info">Email:</label><br>
+                            <input type="text" id="inputEmail" class="form-control" placeholder="Email" required autofocus asp-for="Email">
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-info btn-md" type="submit" id="register">Register</button>
+                        </div>
+                        <div id="register-link" class="text-right">
+                            <a class="d-block text-center mt-2 small" asp-controller="Home" asp-action="Index">Sign In</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $("#register").click(function (event) {
+            event.preventDefault();
+            var firstname = $("#firstName").val();
+            var lastname = $("#LastName").val();
+            var username1 = $("#inputUserame").val();
+            var password1 = $("#inputPassword").val();
+            var email = $("#inputEmail").val();
+            $.ajax({
+                url: '/api/user/Post/',
+                type: 'POST',
+                data: JSON.stringify({ "username": username1, "pwd": password1, "firstname": firstname, "lastname": lastname, "email": email }),
+                dataType: 'JSON',
+                contentType: "application/json",
+                success: function (data) {
+                    if (data == null) {
+                        $('#message').attr("style", "display: block");
+                    }
+                    else {
+                        window.location.href = '@Url.Action("Index","Home")';
+                    }
+                },
+            });
+
+        })
+
+
+    </script>
+}

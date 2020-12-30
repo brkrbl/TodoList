@@ -1,0 +1,126 @@
+﻿@model Entities.Dto.RegisterDto
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" asp-controller="Todo" asp-action="Todos">TodoList</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav" style="margin-left: auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#" id="exit">Exit <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div id="login">
+        <h3 class="text-center text-white pt-5">Register form</h3>
+        <div class="container">
+            <div id="login-row" class="row justify-content-center align-items-center">
+                <div id="login-column" class="col-md-6">
+                    <div id="login-box" class="col-md-12">
+                        <form id="myForm">
+                            <h3 class="text-center text-info">Register</h3>
+                            <div class="form-group">
+                                <label for="Firstname" class="text-info">Firstname:</label><br>
+                                <input type="text" id="firstName" class="form-control" placeholder="Firstname" required autofocus asp-for="Firstname">
+                            </div>
+                            <div class="form-group">
+                                <label for="Lastname" class="text-info">Lastname:</label><br>
+                                <input type="text" id="LastName" class="form-control" placeholder="Lastname" required autofocus asp-for="Lastname">
+                            </div>
+                            <div class="form-group">
+                                <label for="username" class="text-info">Username:</label><br>
+                                <input type="text" id="inputUserame" class="form-control" placeholder="Username" required autofocus asp-for="Username">
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="text-info">Password:</label><br>
+                                <input type="password" id="inputPassword" class="form-control" placeholder="Password" required asp-for="Pwd">
+                            </div>
+                            <div class="form-group">
+                                <label for="Email" class="text-info">Email:</label><br>
+                                <input type="text" id="inputEmail" class="form-control" placeholder="Email" required autofocus asp-for="Email">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-info btn-md" type="submit" id="update">Update</button>
+                                <button class="btn btn-danger btn-md" type="submit" id="delete" style="float: right;">Delete Account</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section scripts {
+
+    <script>
+        var userId = parseInt(localStorage.getItem('id'));
+        var token = localStorage.getItem('key');
+        $(document).ready(function () {
+            $.ajax({
+                type: 'GET',
+                url: '/api/user/Get/' + userId,
+                data: JSON.stringify({ "id": userId }),
+                headers: { Authorization: 'Bearer ' + token },
+                success: function (data) {
+                    document.getElementById('firstName').value = data.firstname;
+                    document.getElementById('LastName').value = data.lastname;
+                    document.getElementById('inputUserame').value = data.username;
+                    document.getElementById('inputPassword').value = data.pwd;
+                    document.getElementById('inputEmail').value = data.email;
+
+                },
+
+            });
+        });
+
+        $("#update").click(function (event) {
+            event.preventDefault();
+            var firstname = document.getElementById('firstName').value;
+            var lastname = document.getElementById('LastName').value;
+            var username = document.getElementById('inputUserame').value;
+            var password = document.getElementById('inputPassword').value;
+            var email = document.getElementById('inputEmail').value;
+            $.ajax({
+                url: '/api/user/PUT/',
+                type: 'PUT',
+                data: JSON.stringify({ "id": userId, "firstname": firstname, "lastname": lastname, "username": username, "pwd": password, "email": email }),
+                headers: { Authorization: 'Bearer ' + token },
+                dataType: 'JSON',
+                contentType: "application/json",
+                success: function (data) {
+                    if (data != null) {
+                        window.location.href = '@Url.Action("Todos","Todo")';
+                    }
+                },
+
+            });
+
+        });
+        $("#exit").click(function (event) {
+            localStorage.clear();
+            window.location.href = '@Url.Action("Index","Home")';
+        })
+
+        $("#delete").click(function (event) {
+            event.preventDefault();
+            localStorage.clear();
+            $(document).ready(function () {
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/api/user/Delete/' + userId,
+                    data: { "id": userId },
+                    headers: { Authorization: 'Bearer ' + token },
+                    success: function () {
+                        window.location.href = '@Url.Action("Index","Home")';
+                    }
+                });
+            });
+        });
+
+    </script>
+
+}

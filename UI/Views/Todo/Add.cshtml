@@ -1,0 +1,57 @@
+﻿@model Entities.Todotable
+
+@{
+    Layout = "~/Views/Shared/_TodoLayout.cshtml";
+}
+
+<style>
+    textarea {
+        width: 100% !important;
+        height: 500px !important;
+    }
+</style>
+
+<div class="card-header">Add Todo</div>
+<div class="card-body">
+    <form id="todo-form" name="form" asp-controller="Todo" asp-action="Add">
+        <div class="form-row">
+            <input class="form-control" id="header" placeholder="Header" asp-for="Theader" required>
+            <br />
+            <br />
+            <textarea class="form-control" type="text" id="content" placeholder="Content" asp-for="Tcontent" required></textarea>
+        </div>
+        <br />
+        <br />
+        <button id="add" type="submit" class="btn btn-danger" style="width:200px">Add Todo</button>
+    </form>
+    <hr>
+</div>
+
+@section scripts {
+    <script>
+        var user = parseInt(localStorage.getItem("id"));
+        var token = localStorage.getItem('key');
+        $(document).ready(function () {
+            $("#add").click(function () {
+                event.preventDefault();
+                var header = $("#header").val();
+                var content = $("#content").val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/todo/',
+                    type: 'POST',
+                    data: JSON.stringify({ "header": header, "content": content, "userId": user }),
+                    headers: { Authorization: 'Bearer ' + token },
+                    dataType: 'JSON',
+                    contentType: "application/json",
+                    success: function (data) {
+                        window.location.href = '@Url.Action("Todos","Todo")';
+                    },
+                    error: function () {
+
+                    }
+                });
+            });
+        });
+    </script>
+}
